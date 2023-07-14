@@ -1,0 +1,22 @@
+<spi name="eventsListener">
+    <provider name="HmacSha1" enabled="true">
+        <properties>            
+            <property name="secretKey" value="<<<ReplaceWithSecretKey>>>"/>
+        </properties>
+    </provider>
+    <provider name="HmacSha256" enabled="true">
+        <properties>            
+            <property name="secretKey" value="<<<ReplaceWithSecretKey>>>"/>
+        </properties>
+    </provider>
+    <provider name="HmacSha384" enabled="true">
+        <properties>            
+            <property name="secretKey" value="<<<ReplaceWithSecretKey>>>"/>
+        </properties>
+    </provider>
+    <provider name="HmacSha512" enabled="true">
+        <properties>            
+            <property name="secretKey" value="<<<ReplaceWithSecretKey>>>"/>
+        </properties>
+    </provider>
+</spi>

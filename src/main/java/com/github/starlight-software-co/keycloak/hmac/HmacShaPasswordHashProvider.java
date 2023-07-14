@@ -16,6 +16,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author <a href="mailto:mark@starlight.software">Mark Lanning</a>
+ * @see https://github.com/keycloak/keycloak/tree/main/server-spi-private/src/main/java/org/keycloak/credential/hash
+ * @see https://github.com/leroyguillaume/keycloak-bcrypt
 */
 public class HmacShaPasswordHashProvider implements PasswordHashProvider 
 {   
