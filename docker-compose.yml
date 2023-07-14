@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  keycloak:
+    image: lanmark/keycloak-hmac-sha
+    environment:      
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8443:8443        
+    command: ["start", "--auto-build"]
+    depends_on: [db]
