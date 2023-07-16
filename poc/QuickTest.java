@@ -2,10 +2,11 @@ public class QuickTest {
     
     public static void main (String[] args) {
            
-        final String secretKey = "SecretKey1234567890!";
+        final String secretKey = "SecretKey!";
 
         final String rawPassword = "Password!";
-        final String salt = "S@lt!";
+        final String salt = "uQsmZO8EZq";
+
 
         //System.out.print("Secret Key: ");
         //System.out.println(secretKey);

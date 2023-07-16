@@ -3,8 +3,12 @@ package com.github.starlightsoftware.hmacsha;
 import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.models.PasswordPolicy;
 import org.keycloak.models.credential.PasswordCredentialModel;
+import org.keycloak.common.util.Base64;
+import org.keycloak.Config;
 
-import java.util.Base64;
+import org.jboss.logging.Logger;
+import java.io.IOException;
+
 import java.security.SecureRandom;
 import java.nio.charset.StandardCharsets;
 
@@ -15,17 +19,19 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * @author <a href="mailto:mark@starlight.software">Mark Lanning</a>
+ * @author <a href="mailto:info@starlight.software">Mark Lanning</a>
  * @see https://github.com/keycloak/keycloak/tree/main/server-spi-private/src/main/java/org/keycloak/credential/hash
  * @see https://github.com/leroyguillaume/keycloak-bcrypt
 */
 public class HmacShaPasswordHashProvider implements PasswordHashProvider 
 {   
+    protected static Logger log = Logger.getLogger(HmacShaPasswordHashProvider.class);
+
     private final String providerId;
     private final String hmacAlgorithm;
     private final String secretKey;
     
-    public HmacSha1PasswordHashProvider(String providerId, String hmacAlgorithm, String secretKey)
+    public HmacShaPasswordHashProvider(String providerId, String hmacAlgorithm, String secretKey)
     {
         this.providerId = providerId;
         this.hmacAlgorithm = hmacAlgorithm;
@@ -47,11 +53,12 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
             iterations = 1; // technically there are no iterations
         } 
 
-        String salt = generateSaltBase64();
+        byte[] saltBytes = generateSaltBytes();
+        String salt = Base64.encodeBytes(saltBytes);
 
         String encodedPassword = encode(rawPassword, salt);
 
-        return PasswordCredentialModel.createFromValues(providerId, salt, iterations, encodedPassword);
+        return PasswordCredentialModel.createFromValues(providerId, saltBytes, iterations, encodedPassword);
     }
 
     @Override
@@ -61,7 +68,8 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
             iterations = 1; // technically there are no iterations
         } 
         
-        String salt = generateSaltBase64();
+        byte[] saltBytes = generateSaltBytes();
+        String salt = Base64.encodeBytes(saltBytes);
 
         return encode(rawPassword, salt);
     }
@@ -69,15 +77,26 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     @Override
     public boolean verify(String rawPassword, PasswordCredentialModel credential) 
     {      
+        
+        log.infof("HmacShaPasswordHashProvider.verify()");
         String existingHash = credential.getPasswordSecretData().getValue();
 
         byte[] existingSaltBytes = credential.getPasswordSecretData().getSalt();    //returns as byte array
-        String existingSalt = Base64.getEncoder().encodeToString(existingSaltBytes);
-                
+        String existingSalt = new String(existingSaltBytes);
+        
         // calculate and compare
-        String rawPasswordHash = encode(rawPassword, salt);
+        String rawPasswordHash = encode(rawPassword, existingSalt);
 
-        return rawPasswordHash.equals(existingHash);
+        if(!rawPasswordHash.equals(existingHash))
+        {
+            log.debugf("Hash Mismatch:");
+            log.debugf("   Raw Hash: %s", rawPasswordHash);
+            log.debugf("Stored Hash: %s", existingHash);
+            log.debugf("Stored Salt: %s", existingSalt);            
+            return false;
+        }
+        
+        return true;
     }
 
     @Override
@@ -87,13 +106,13 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     }
     
     
-    private static String generateSaltBase64() 
+    private static byte[] generateSaltBytes() 
     {
         SecureRandom random = new SecureRandom();
         byte saltBytes[] = new byte[12];
         random.nextBytes(saltBytes);
         
-        return Base64.getEncoder().encodeToString(saltBytes);
+        return saltBytes;
     }
 
     public String encode(String rawPassword, String salt) 
@@ -113,7 +132,7 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
             byte[] macData = hashFactory.doFinal(saltedBytes);
 
             // Can either base64 encode or put it right into hex
-            return Base64.getEncoder().encodeToString(macData);  
+            return Base64.encodeBytes(macData);  
             
         } 
         catch (InvalidKeyException | NoSuchAlgorithmException e) 
@@ -121,4 +140,26 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
             return "==ERROR: " + e.getMessage();
         }
     }  
+
+
+    public static String GetAlgorithmKey(Config.Scope config)
+    {        
+        var algorithmKey64 = config.get("key");
+        if(algorithmKey64 == null){ return null; }
+
+        try
+        {
+            // de-base64 the string 
+            return new String(Base64.decode(algorithmKey64));        
+        } 
+        catch (IOException e)
+        {
+            Logger log = Logger.getLogger(HmacShaPasswordHashProvider.class);
+
+            log.error("Unable to base64 decode algorithm key from configuration.");
+            log.error(e);
+
+            return null;
+        }
+    }    
 }

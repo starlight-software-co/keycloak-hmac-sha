@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.github.starlightsoftware"
-version = "1.0.0"
+version = "1.1.7"
 
 repositories {
     mavenCentral()
@@ -16,13 +16,9 @@ configurations {
 }
 
 dependencies {
-    val hmacShaVersion = "0.1.0"
     val jbossLoggingVersion = "3.4.1.Final"
     val keycloakVersion = project.property("dependency.keycloak.version")
     val junitVersion = "5.8.2"
-
-    // hmacShaVersion
-    implementation("at.favre.lib:hmacSha:$hmacShaVersion")
 
     // JBoss
     compileOnly("org.jboss.logging:jboss-logging:$jbossLoggingVersion")
