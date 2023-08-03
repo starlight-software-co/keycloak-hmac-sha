@@ -30,6 +30,7 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     private final String providerId;
     private final String hmacAlgorithm;
     private final String secretKey;
+    private final Boolean isRehash = true;  // since this algorithm is out of date we want to rehash the values to the standard algorithm
     
     public HmacShaPasswordHashProvider(String providerId, String hmacAlgorithm, String secretKey)
     {
@@ -41,8 +42,6 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     @Override
     public boolean policyCheck(PasswordPolicy policy, PasswordCredentialModel credential) 
     {
-        //TODO: Check if secret key is actually defined?
-
         return providerId.equals(credential.getPasswordCredentialData().getAlgorithm());
     }
 
@@ -76,17 +75,15 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
 
     @Override
     public boolean verify(String rawPassword, PasswordCredentialModel credential) 
-    {      
-        
-        log.infof("HmacShaPasswordHashProvider.verify()");
+    {
+        log.debugf("HmacShaPasswordHashProvider.verify()");
         String existingHash = credential.getPasswordSecretData().getValue();
 
         byte[] existingSaltBytes = credential.getPasswordSecretData().getSalt();    //returns as byte array
         String existingSalt = new String(existingSaltBytes);
         
-        // calculate and compare
+        // calculate and compare        
         String rawPasswordHash = encode(rawPassword, existingSalt);
-
         if(!rawPasswordHash.equals(existingHash))
         {
             log.debugf("Hash Mismatch:");
@@ -95,7 +92,13 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
             log.debugf("Stored Salt: %s", existingSalt);            
             return false;
         }
-        
+
+        // since we now know the right password, use it to rehash the password hash with newer algorithm
+        if(isRehash)
+        {
+            rehashPassword(rawPassword);
+        }
+
         return true;
     }
 
@@ -103,6 +106,25 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     public void close() 
     {
         //nothing
+    }
+
+    
+    private static void rehashPassword(String rawPassword)
+    {
+        log.debugf("Rehashing Password.");
+
+        // default algorithm specifics (TODO: get default hash algorithm from realm password policy)
+        String providerId = "pbkdf2-sha256";
+        String algorithmId = "PBKDF2WithHmacSHA256";
+        int defaultIterations = 27500;
+
+        byte[] saltBytes = generateSaltBytes();
+        String salt = Base64.encodeBytes(saltBytes);
+
+        var hashAlgorithm = new org.keycloak.credential.hash.Pbkdf2PasswordHashProvider(providerId, algorithmId, defaultIterations, 0, 256);
+        String encodedPassword = hashAlgorithm.encode(rawPassword, defaultIterations);
+
+        PasswordCredentialModel.createFromValues(algorithmId, saltBytes, defaultIterations, encodedPassword);
     }
     
     

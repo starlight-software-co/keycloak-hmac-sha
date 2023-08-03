@@ -38,10 +38,10 @@ public class HmacSha512PasswordHashProviderFactory implements PasswordHashProvid
         }
         else
         {
-            log.warn("Unable to find hmac-sha512 initialization key from config. Falling back to static generated key.");
+            log.warn("Unable to find hmac-sha512 initialization key from config. Falling back to static generated key...chB");
 
             this.algorithmKey = "P@ssw0rdsAreHard!gshLgK#&tt4z5^Zr!5GHd6t4cVhrB^cXJxktenoAZia%Wg";  //Random Password generated 
-            
+                                    
             return;
         }
     }
