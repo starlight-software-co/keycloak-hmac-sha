@@ -120,8 +120,7 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
         int defaultIterations = 27500;
 
         byte[] saltBytes = generateSaltBytes();
-        String salt = Base64.encodeBytes(saltBytes);
-
+        
         var hashAlgorithm = new org.keycloak.credential.hash.Pbkdf2PasswordHashProvider(providerId, algorithmId, defaultIterations, 0, 256);
         String encodedPassword = hashAlgorithm.encode(rawPassword, defaultIterations);
 
