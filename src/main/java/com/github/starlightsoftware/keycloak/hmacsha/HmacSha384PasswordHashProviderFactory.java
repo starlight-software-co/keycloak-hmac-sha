@@ -1,35 +1,45 @@
-// package com.github.starlightsoftware.hmacsha;
+// package com.github.starlightsoftware.keycloak.hmacsha;
 
 // import org.keycloak.Config;
 // import org.keycloak.credential.hash.PasswordHashProvider;
 // import org.keycloak.credential.hash.PasswordHashProviderFactory;
 // import org.keycloak.models.KeycloakSession;
 // import org.keycloak.models.KeycloakSessionFactory;
-// import org.keycloak.provider.ProviderFactory;
 
 // import org.jboss.logging.Logger;
 
 // /**
 //  * @author <a href="mailto:info@starlight.software">Mark Lanning</a>
 //  */
-// public class HmacSha256PasswordHashProviderFactory implements PasswordHashProviderFactory {
+// public class HmacSha384PasswordHashProviderFactory implements PasswordHashProviderFactory {
     
-//     protected static Logger log = Logger.getLogger(HmacSha256PasswordHashProviderFactory.class);
+//     protected static Logger log = Logger.getLogger(HmacSha384PasswordHashProviderFactory.class);
 
-//     public static final String ID = "hmac-sha256";
-//     public static final String ALGORITHM = "HmacSHA256";
+//     public static final String ID = "hmac-sha384";
+//     public static final String ALGORITHM = "HmacSHA384";
         
 //     private String algorithmKey;
+//     private boolean isRehash;
 
 //     @Override
 //     public PasswordHashProvider create(KeycloakSession session) 
 //     {
-//         return new HmacShaPasswordHashProvider(ID, ALGORITHM, this.algorithmKey);
+//         return new HmacShaPasswordHashProvider(ID, ALGORITHM, this.algorithmKey, this.isRehash);
 //     }
 
 //     @Override
 //     public void init(Config.Scope config) 
-//     {        
+//     {   
+//         this.isRehash = config.getBoolean("rehash", true);
+//         if(this.isRehash)
+//         {
+//             log.info("Password rehashing enabled!");
+//         }
+//         else
+//         {
+//             log.info("Password rehashing disabled.");
+//         }
+
 //         String key = HmacShaPasswordHashProvider.GetAlgorithmKey(config);
 //         if(key != null)
 //         {

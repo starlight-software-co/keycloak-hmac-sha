@@ -1,4 +1,4 @@
-package com.github.starlightsoftware.hmacsha;
+package com.github.starlightsoftware.keycloak.hmacsha;
 
 import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.models.PasswordPolicy;
@@ -30,13 +30,14 @@ public class HmacShaPasswordHashProvider implements PasswordHashProvider
     private final String providerId;
     private final String hmacAlgorithm;
     private final String secretKey;
-    private final Boolean isRehash = true;  // since this algorithm is out of date we want to rehash the values to the standard algorithm
+    private final Boolean isRehash;  // this algorithm is out of date we want to rehash the values to the standard algorithm
     
-    public HmacShaPasswordHashProvider(String providerId, String hmacAlgorithm, String secretKey)
+    public HmacShaPasswordHashProvider(String providerId, String hmacAlgorithm, String secretKey, boolean isRehash)
     {
         this.providerId = providerId;
         this.hmacAlgorithm = hmacAlgorithm;
         this.secretKey = secretKey;
+        this.isRehash = isRehash;
     }
 
     @Override
