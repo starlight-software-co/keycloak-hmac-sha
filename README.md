@@ -1,5 +1,5 @@
 # keycloak-hmac-sha
-Keycloak Authentication SPI for HMAC SHA hashing.  This is a simple implementation which that takes the raw password from the user concatenates the generated salt value and then hashes it.  This is very much not that secure over newer best practices that utilizes PBKDF2 (Password-Based Key Derivation Function 2) with iterations that provide a heavy compute cost for brute force attacks.
+Keycloak Authentication SPI for HMAC SHA hashing.  This is a simple implementation which that takes the raw password from the user concatenates the generated salt value and then hashes it.  This is very much not that secure over newer best practices that utilizes PBKDF2 (Password-Based Key Derivation Function 2) with iterations that provide a heavy compute cost for brute force attacks.  This plugin by default will re-hash passwords that successfully validate in order to slowly migrate legacy passwords to newer practices.
 
 ## Build JAR
 
@@ -24,3 +24,11 @@ Example for HMAC SHA512:
 ```
 start --spi-password-hashing-hmac-sha512-key=StrongAlgorithmSecretKey
 ```
+
+# Acknowledgements
+
+It is worth pointing out that this plugin is heavily based on another example found in GitHub and worth checking out that repository as well.  This code is purpose built to solve a problem with migrating thousands of users from a legacy system that used HMAC SHA512 and be able to continue using those existing password hashes.  There is likely files in this repository that are forked from the below repo and may not be used in this implementation especially around Docker files.
+
+Please check out the BCrypt example here:
+https://github.com/leroyguillaume/keycloak-bcrypt
+
